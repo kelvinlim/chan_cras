@@ -21,12 +21,18 @@ Implementation of SQLModel entities:
 - `StudyUserAccess`: [NEW] Many-to-many relationship between Users and Studies.
 - `Subject`: Participant data with unique UUID for privacy.
 - `Procedure`: Protocol definitions with JSONB schemas.
-- `Event`: Transactional clinical data records.
+- `Event`: Transactional clinical data records (Ref: `ev-XXXXXX`).
 - `AuditLog`: FDA Part 11 compliant change tracking.
     - **Reconstruction Support**: Design schema to allow "playing back" any table to any point in time by storing comprehensive diffs or state snapshots.
 
-#### [NEW] [utils.py](file:///home/kelvin/Projects/chan_cras/backend/app/utils.py)
-- `generate_short_code`: 6-char reference code generator.
+- **Ref Code Format Update**:
+    - Study: `st-A7B9X2`
+    - Event: `ev-A7B9X2`
+    - Procedure: `pr-A7B9X2`
+    - Subject: `su-A7B9X2`
+
+#### [MODIFY] [utils.py](file:///home/kelvin/Projects/chan_cras/backend/app/utils.py)
+- `generate_short_code`: Enhanced to support prefixes and toggleable middle hyphens.
 - `uuid7`: Time-sortable UUID generation.
 
 #### [NEW] [database.py](file:///home/kelvin/Projects/chan_cras/backend/app/database.py)

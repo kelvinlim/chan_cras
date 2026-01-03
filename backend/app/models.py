@@ -3,7 +3,14 @@ from datetime import datetime
 from typing import Optional, List, Dict, Any
 from sqlmodel import SQLModel, Field, Relationship
 from sqlalchemy.dialects.postgresql import JSONB
-from app.utils import uuid7, generate_short_code
+from app.utils import (
+    uuid7, 
+    generate_short_code, 
+    generate_study_code, 
+    generate_event_code, 
+    generate_procedure_code, 
+    generate_subject_code
+)
 
 # --- Base Model ---
 class BaseModel(SQLModel):
@@ -12,10 +19,9 @@ class BaseModel(SQLModel):
     """
     id: uuid.UUID = Field(default_factory=uuid7, primary_key=True)
     ref_code: str = Field(
-        default_factory=generate_short_code, 
         unique=True, 
         index=True, 
-        max_length=10
+        max_length=12
     )
     created_at: datetime = Field(default_factory=datetime.utcnow)
     created_by: str  # User ID/Email
@@ -47,6 +53,7 @@ class User(BaseModel, table=True):
     status: str = Field(default="active")  # active, inactive
     is_superuser: bool = False
     admin_level: int = Field(default=0)  # 0=none, 1=study limited, 2=study full
+    ref_code: str = Field(default_factory=lambda: generate_short_code(prefix="us-", use_mid_hyphen=False), unique=True, index=True)
     
     metadata_blob: Dict[str, Any] = Field(default={}, sa_type=JSONB)
     
@@ -60,6 +67,7 @@ class Study(BaseModel, table=True):
     title: str
     description: Optional[str] = None
     principal_investigator: str
+    ref_code: str = Field(default_factory=generate_study_code, unique=True, index=True)
     is_active: bool = True
     
     metadata_blob: Dict[str, Any] = Field(default={}, sa_type=JSONB)
@@ -78,6 +86,7 @@ class Subject(BaseModel, table=True):
     middlename: Optional[str] = None
     email: Optional[str] = None
     phone: Optional[str] = None
+    ref_code: str = Field(default_factory=generate_subject_code, unique=True, index=True)
     birthdate: datetime
     
     # Privacy: Random UUID4 for data sharing (contains no timestamp info)
@@ -92,6 +101,7 @@ class Procedure(BaseModel, table=True):
     """
     study_id: uuid.UUID = Field(foreign_key="study.id")
     name: str  
+    ref_code: str = Field(default_factory=generate_procedure_code, unique=True, index=True)
     description: str  
     
     form_data_schema: Dict[str, Any] = Field(default={}, sa_type=JSONB) 
@@ -112,6 +122,7 @@ class Event(BaseModel, table=True):
     start_datetime: datetime
     end_datetime: Optional[datetime] = None
     
+    ref_code: str = Field(default_factory=generate_event_code, unique=True, index=True)
     status: str = Field(default="pending")  # pending, completed, cancelled, no_show
     
     metadata_blob: Dict[str, Any] = Field(default={}, sa_type=JSONB)
