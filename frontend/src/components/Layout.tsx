@@ -1,5 +1,15 @@
 import React from 'react';
-import { User as UserIcon, LogOut, ChevronRight, Activity, Users, BookOpen, ClipboardList } from 'lucide-react';
+import {
+    User as UserIcon,
+    LogOut,
+    ChevronRight,
+    BarChart3,
+    Users,
+    BookOpen,
+    ClipboardList,
+    Link2,
+    Settings as SettingsIcon
+} from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -7,21 +17,30 @@ function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
 
+interface User {
+    id: string;
+    email: string;
+    admin_level: number;
+}
+
 interface LayoutProps {
     children: React.ReactNode;
     onNewEvent?: () => void;
     currentView?: string;
     onNavigate?: (view: string) => void;
+    user?: User;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children, onNewEvent, currentView = 'Dashboard', onNavigate }) => {
+const Layout: React.FC<LayoutProps> = ({ children, onNewEvent, currentView = 'Dashboard', onNavigate, user }) => {
     const [sidebarOpen, setSidebarOpen] = React.useState(true);
 
     const menuItems = [
-        { id: 'Dashboard', name: 'Dashboard', icon: Activity, href: '#' },
+        { id: 'Dashboard', name: 'Dashboard', icon: BarChart3, href: '#' },
         { id: 'Studies', name: 'Studies', icon: BookOpen, href: '#' },
         { id: 'Subjects', name: 'Subjects', icon: Users, href: '#' },
+        { id: 'Linkage', name: 'Linkage', icon: Link2, href: '#' },
         { id: 'Procedures', name: 'Procedures', icon: ClipboardList, href: '#' },
+        ...(user?.admin_level === 2 ? [{ id: 'Settings', name: 'Settings', icon: SettingsIcon, href: '#' }] : []),
     ];
 
     return (
@@ -36,7 +55,6 @@ const Layout: React.FC<LayoutProps> = ({ children, onNewEvent, currentView = 'Da
                 {/* Logo Section */}
                 <div className="p-6 flex items-center gap-3 border-b border-white/10">
                     <div className="w-10 h-10 bg-white rounded-md flex items-center justify-center shrink-0">
-                        {/* Minimalist representation of HKU Shield */}
                         <span className="text-hku-green font-bold text-lg italic">HKU</span>
                     </div>
                     {sidebarOpen && (
@@ -91,12 +109,22 @@ const Layout: React.FC<LayoutProps> = ({ children, onNewEvent, currentView = 'Da
                         </div>
                         {sidebarOpen && (
                             <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium truncate">Kelvin Chan</p>
-                                <p className="text-[10px] text-white/60 truncate italic">Principal Investigator</p>
+                                <p className="text-sm font-medium truncate">{user?.email || 'User'}</p>
+                                <p className="text-[10px] text-white/60 truncate italic">{user?.admin_level === 2 ? 'Administrator' : 'Researcher'}</p>
                             </div>
                         )}
                         {sidebarOpen && <LogOut className="w-4 h-4 text-white/50 cursor-pointer hover:text-hku-error transition-colors" />}
                     </div>
+                </div>
+
+                {/* Version Info */}
+                <div className="px-6 py-2 border-t border-white/5">
+                    <p className={cn(
+                        "text-[9px] font-mono tracking-tighter transition-all duration-300",
+                        sidebarOpen ? "text-white/30" : "text-white/20 text-center"
+                    )}>
+                        {sidebarOpen ? 'VERSION 0.1.1' : 'v0.1.1'}
+                    </p>
                 </div>
             </aside>
 

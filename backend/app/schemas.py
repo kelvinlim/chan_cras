@@ -40,7 +40,7 @@ class SubjectBase(BaseModel):
     email: Optional[str] = None
     phone: Optional[str] = None
     birthdate: datetime
-    gender: Optional[str] = None
+    sex: Optional[str] = None
 
 class SubjectCreate(SubjectBase):
     pass
@@ -52,7 +52,7 @@ class SubjectUpdate(BaseModel):
     email: Optional[str] = None
     phone: Optional[str] = None
     birthdate: Optional[datetime] = None
-    gender: Optional[str] = None
+    sex: Optional[str] = None
 
 class SubjectRead(SubjectBase):
     id: uuid.UUID

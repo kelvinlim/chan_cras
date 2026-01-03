@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 import json
 from sqlmodel import Session, select
-from typing import List
+from typing import List, Optional
 from app.database import get_session
 from app.models import Event, User
 from app.auth import get_current_user
@@ -18,6 +18,7 @@ class EventBase(BaseModel):
     start_datetime: datetime
     end_datetime: datetime = None
     status: str = "pending"
+    notes: Optional[str] = None
     metadata_blob: dict = {}
     procedure_data: dict = {}
 
@@ -110,3 +111,33 @@ def update_event(
     session.commit()
     
     return db_event
+
+@router.delete("/{event_id}")
+def delete_event(
+    event_id: uuid.UUID,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """Deletes an event and logs the change."""
+    db_event = session.get(Event, event_id)
+    if not db_event:
+        raise HTTPException(status_code=404, detail="Event not found")
+    
+    prev_state = json.loads(db_event.json())
+    
+    session.delete(db_event)
+    session.commit()
+    
+    # Audit Log
+    log_change(
+        session=session,
+        table_name="event",
+        record_id=db_event.id,
+        action="DELETE",
+        changed_by=current_user.email,
+        prev_state=prev_state,
+        new_state=None
+    )
+    session.commit()
+    
+    return {"message": "Event deleted successfully"}

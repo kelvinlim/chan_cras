@@ -54,6 +54,18 @@ export const studyService = {
     delete: async (id: string) => {
         const response = await api.delete(`/studies/${id}`);
         return response.data;
+    },
+    linkSubject: async (studyId: string, subjectId: string) => {
+        const response = await api.post(`/studies/${studyId}/subjects/${subjectId}`);
+        return response.data;
+    },
+    unlinkSubject: async (studyId: string, subjectId: string) => {
+        const response = await api.delete(`/studies/${studyId}/subjects/${subjectId}`);
+        return response.data;
+    },
+    listSubjects: async (studyId: string) => {
+        const response = await api.get(`/studies/${studyId}/subjects`);
+        return response.data;
     }
 };
 
@@ -96,18 +108,17 @@ export const procedureService = {
 };
 
 export const eventService = {
-    list: async () => {
-        const response = await api.get('/events/');
-        return response.data;
-    },
-    create: async (eventData: any) => {
-        const response = await api.post('/events/', eventData);
-        return response.data;
-    },
-    update: async (id: string, eventData: any) => {
-        const response = await api.patch(`/events/${id}`, eventData);
-        return response.data;
-    }
+    list: async () => (await api.get('/events/')).data,
+    create: async (data: any) => (await api.post('/events/', data)).data,
+    get: async (id: string) => (await api.get(`/events/${id}`)).data,
+    update: async (id: string, data: any) => (await api.patch(`/events/${id}`, data)).data,
+    delete: async (id: string) => (await api.delete(`/events/${id}`)).data,
+};
+
+export const settingsService = {
+    list: async () => (await api.get('/settings/')).data,
+    update: async (key: string, value: string) => (await api.patch(`/settings/${key}?value=${encodeURIComponent(value)}`)).data,
+    getConfig: async () => (await api.get('/settings/config')).data,
 };
 
 export default api;

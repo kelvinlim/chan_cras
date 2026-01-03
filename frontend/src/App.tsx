@@ -1,29 +1,35 @@
 import { useState, useEffect, useCallback } from 'react';
 import Layout from './components/Layout';
 import WeeklyCalendar from './components/WeeklyCalendar';
-import NewEventModal from './components/NewEventModal';
-import { authService, eventService, studyService, subjectService, procedureService } from './services/api';
+import EventModal from './components/EventModal';
+import { authService, eventService, studyService, subjectService, procedureService, settingsService } from './services/api';
 
 import EntityManager from './components/EntityManager';
+import StudySubjectLinker from './components/StudySubjectLinker';
+import SettingsManager from './components/SettingsManager';
 
 function App() {
   const [currentView, setCurrentView] = useState('Dashboard');
-  const [isNewEventModalOpen, setIsNewEventModalOpen] = useState(false);
+  const [isEventModalOpen, setIsEventModalOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [events, setEvents] = useState<any[]>([]);
   const [lookups, setLookups] = useState<{ studies: any[], subjects: any[], procedures: any[] }>({
     studies: [],
     subjects: [],
     procedures: []
   });
-  const [loading, setLoading] = useState(true);
+  const [systemConfig, setSystemConfig] = useState<{ DEFAULT_TIMEZONE: string }>({ DEFAULT_TIMEZONE: 'Asia/Hong_Kong' });
+  const [currentUser, setCurrentUser] = useState<any>(null);
 
   const fetchData = useCallback(async () => {
     try {
-      const [eventsData, studiesData, subjectsData, proceduresData] = await Promise.all([
+      const [eventsData, studiesData, subjectsData, proceduresData, configData, userData] = await Promise.all([
         eventService.list(),
         studyService.list(),
         subjectService.list(),
-        procedureService.list()
+        procedureService.list(),
+        settingsService.getConfig(),
+        authService.getMe()
       ]);
       setEvents(eventsData);
       setLookups({
@@ -31,10 +37,10 @@ function App() {
         subjects: subjectsData,
         procedures: proceduresData
       });
+      setSystemConfig(configData);
+      setCurrentUser(userData);
     } catch (error) {
       console.error("Failed to fetch data:", error);
-    } finally {
-      setLoading(false);
     }
   }, []);
 
@@ -78,8 +84,16 @@ function App() {
               { key: 'firstname', label: 'First Name', type: 'text' },
               { key: 'lastname', label: 'Last Name', type: 'text' },
               { key: 'birthdate', label: 'DOB', type: 'date' },
-              { key: 'gender', label: 'Gender', type: 'text' },
+              { key: 'sex', label: 'Sex', type: 'select', options: [{ label: 'Male', value: 'male' }, { label: 'Female', value: 'female' }] },
             ]}
+            onRefresh={fetchData}
+          />
+        );
+      case 'Linkage':
+        return (
+          <StudySubjectLinker
+            studies={lookups.studies}
+            subjects={lookups.subjects}
             onRefresh={fetchData}
           />
         );
@@ -90,7 +104,12 @@ function App() {
             service={procedureService}
             fields={[
               { key: 'ref_code', label: 'Ref Code', type: 'text', readOnly: true },
-              { key: 'study_id', label: 'Study', type: 'select', options: lookups.studies.map(s => ({ label: s.title, value: s.id })) },
+              {
+                key: 'study_id', label: 'Study', type: 'select', persistent: true, options: lookups.studies.map(s => ({
+                  label: `${s.ref_code}: ${s.title.substring(0, 20)}${s.title.length > 20 ? '...' : ''}`,
+                  value: s.id
+                }))
+              },
               { key: 'name', label: 'Procedure Name', type: 'text' },
               { key: 'description', label: 'Description', type: 'text' },
               { key: 'form_data_schema', label: 'Form Schema (JSON)', type: 'json' },
@@ -98,6 +117,8 @@ function App() {
             onRefresh={fetchData}
           />
         );
+      case 'Settings':
+        return <SettingsManager />;
       default:
         return (
           <>
@@ -106,8 +127,15 @@ function App() {
               <WeeklyCalendar
                 events={events}
                 lookups={lookups}
-                onRefresh={fetchData}
-                loading={loading}
+                timezone={systemConfig.DEFAULT_TIMEZONE}
+                onEventClick={(event) => {
+                  setSelectedEvent(event);
+                  setIsEventModalOpen(true);
+                }}
+                onAddEvent={() => {
+                  setSelectedEvent(null);
+                  setIsEventModalOpen(true);
+                }}
               />
             </div>
 
@@ -135,15 +163,23 @@ function App() {
     <Layout
       currentView={currentView}
       onNavigate={setCurrentView}
-      onNewEvent={() => setIsNewEventModalOpen(true)}
+      onNewEvent={() => {
+        setSelectedEvent(null);
+        setIsEventModalOpen(true);
+      }}
+      user={currentUser}
     >
       <div className="space-y-6 h-full flex flex-col">
         {renderContent()}
 
-        <NewEventModal
-          isOpen={isNewEventModalOpen}
-          onClose={() => setIsNewEventModalOpen(false)}
+        <EventModal
+          isOpen={isEventModalOpen}
+          onClose={() => setIsEventModalOpen(false)}
           onEventCreated={fetchData}
+          onEventUpdated={fetchData}
+          onEventDeleted={fetchData}
+          timezone={systemConfig.DEFAULT_TIMEZONE}
+          event={selectedEvent}
         />
       </div>
     </Layout>

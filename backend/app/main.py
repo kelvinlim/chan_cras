@@ -13,7 +13,7 @@ from app.auth import (
     admin_required
 )
 
-from app.routers import studies, subjects, procedures, events
+from app.routers import studies, subjects, procedures, events, settings
 
 app = FastAPI(
     title="Clinical Research Management System (CRAS)",
@@ -59,6 +59,7 @@ app.include_router(studies.router)
 app.include_router(subjects.router)
 app.include_router(procedures.router)
 app.include_router(events.router)
+app.include_router(settings.router)
 
 @app.get("/")
 def read_root():

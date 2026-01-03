@@ -8,6 +8,7 @@ interface Field {
     type: 'text' | 'number' | 'date' | 'select' | 'json' | 'checkbox';
     options?: { label: string; value: string }[];
     readOnly?: boolean;
+    persistent?: boolean;
 }
 
 interface EntityManagerProps {
@@ -62,6 +63,10 @@ const EntityManager: React.FC<EntityManagerProps> = ({ title, fields, service, o
             fields.forEach(f => {
                 if (f.type === 'json') initialData[f.key] = {};
                 else if (f.type === 'checkbox') initialData[f.key] = false;
+                else if (f.persistent) {
+                    const saved = localStorage.getItem(`sticky_${title.toLowerCase()}_${f.key}`);
+                    initialData[f.key] = saved || '';
+                }
                 else initialData[f.key] = '';
             });
             setFormData(initialData);
@@ -93,14 +98,26 @@ const EntityManager: React.FC<EntityManagerProps> = ({ title, fields, service, o
                 await service.update(editingItem.id, payload);
             } else {
                 await service.create(payload);
+                // Save persistent fields
+                fields.forEach(f => {
+                    if (f.persistent && formData[f.key]) {
+                        localStorage.setItem(`sticky_${title.toLowerCase()}_${f.key}`, formData[f.key]);
+                    }
+                });
             }
             setIsModalOpen(false);
             fetchItems();
             onRefresh?.();
-        } catch (error) {
+        } catch (error: any) {
             console.error(`Failed to save ${title}:`, error);
-            alert(`Error saving ${title}`);
-        } finally {
+            const errorMsg = error.response?.data?.detail
+                ? typeof error.response.data.detail === 'string'
+                    ? error.response.data.detail
+                    : JSON.stringify(error.response.data.detail)
+                : error.message;
+            alert(`Error saving ${title}: ${errorMsg}`);
+        }
+        finally {
             setLoading(false);
         }
     };

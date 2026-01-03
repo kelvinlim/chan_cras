@@ -42,7 +42,8 @@ def test_crud_and_audit():
         subject_data = {
             "lastname": "Wong",
             "firstname": "David",
-            "birthdate": "1985-05-15T00:00:00"
+            "birthdate": "1985-05-15T00:00:00",
+            "sex": "male"
         }
         r = client.post(f"{BASE_URL}/subjects/", json=subject_data, headers=headers)
         subject = r.json()

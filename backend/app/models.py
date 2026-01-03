@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 from typing import Optional, List, Dict, Any
-from sqlmodel import SQLModel, Field, Relationship
+from sqlmodel import SQLModel, Field, Relationship, Column
 from sqlalchemy.dialects.postgresql import JSONB
 from app.utils import (
     uuid7, 
@@ -18,15 +18,25 @@ class BaseModel(SQLModel):
     Base model featuring UUID7 IDs, human-readable Ref Codes, and audit timestamps.
     """
     id: uuid.UUID = Field(default_factory=uuid7, primary_key=True)
-    ref_code: str = Field(
+    ref_code: Optional[str] = Field(
+        default=None,
         unique=True, 
         index=True, 
         max_length=12
     )
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: Optional[datetime] = Field(default_factory=datetime.utcnow)
     created_by: Optional[str] = Field(default=None)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: Optional[datetime] = Field(default_factory=datetime.utcnow)
     updated_by: Optional[str] = Field(default=None)
+
+# --- Join Table for Study/Subject M2M ---
+class StudySubjectLink(SQLModel, table=True):
+    """
+    Many-to-many relationship between Studies and Subjects.
+    """
+    study_id: uuid.UUID = Field(foreign_key="study.id", primary_key=True)
+    subject_id: uuid.UUID = Field(foreign_key="subject.id", primary_key=True)
+    joined_at: datetime = Field(default_factory=datetime.utcnow)
 
 # --- Join Table for Study/User Access ---
 class StudyUserAccess(SQLModel, table=True):
@@ -74,6 +84,7 @@ class Study(BaseModel, table=True):
     
     # Relationships
     users: List["User"] = Relationship(back_populates="studies", link_model=StudyUserAccess)
+    subjects: List["Subject"] = Relationship(back_populates="studies", link_model=StudySubjectLink)
     procedures: List["Procedure"] = Relationship(back_populates="study")
     events: List["Event"] = Relationship(back_populates="study")
 
@@ -86,14 +97,15 @@ class Subject(BaseModel, table=True):
     middlename: Optional[str] = None
     email: Optional[str] = None
     phone: Optional[str] = None
-    ref_code: str = Field(default_factory=generate_subject_code, unique=True, index=True)
+    ref_code: Optional[str] = Field(default_factory=generate_subject_code, unique=True, index=True)
     birthdate: datetime
-    gender: Optional[str] = None
+    sex: Optional[str] = None # male, female
     
     # Privacy: Random UUID4 for data sharing (contains no timestamp info)
     unique_uuid: uuid.UUID = Field(default_factory=uuid.uuid4, index=True)
     
     # Relationships
+    studies: List["Study"] = Relationship(back_populates="subjects", link_model=StudySubjectLink)
     events: List["Event"] = Relationship(back_populates="subject")
 
 class Procedure(BaseModel, table=True):
@@ -125,6 +137,7 @@ class Event(BaseModel, table=True):
     
     ref_code: str = Field(default_factory=generate_event_code, unique=True, index=True)
     status: str = Field(default="pending")  # pending, completed, cancelled, no_show
+    notes: Optional[str] = Field(default=None, max_length=512)
     
     metadata_blob: Dict[str, Any] = Field(default={}, sa_type=JSONB)
     procedure_data: Dict[str, Any] = Field(default={}, sa_type=JSONB)
@@ -151,3 +164,12 @@ class AuditLog(SQLModel, table=True):
     # new_state stores full record AFTER change
     prev_state: Dict[str, Any] = Field(default={}, sa_type=JSONB)
     new_state: Dict[str, Any] = Field(default={}, sa_type=JSONB)
+
+class SystemSetting(BaseModel, table=True):
+    """
+    Dynamic system configuration stored in the database.
+    """
+    key: str = Field(unique=True, index=True)
+    value: str
+    description: Optional[str] = None
+    category: str = Field(default="General")
