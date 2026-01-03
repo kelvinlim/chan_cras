@@ -10,23 +10,26 @@ import {
     subWeeks,
     addWeeks
 } from 'date-fns';
-import { ChevronLeft, ChevronRight, Edit2, Eye, Users, Calendar as CalendarIcon } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Edit2, Eye, Users, Calendar as CalendarIcon, Play, CheckCircle } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import DynamicForm from './DynamicForm';
+import { eventService } from '../services/api';
 
 function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
-
 
 interface Event {
     id: string;
     title: string;
     subject: string;
     study: string;
+    procedure_id: string;
     startTime: Date;
     endTime: Date;
     status: 'pending' | 'completed' | 'cancelled';
+    procedure_data?: any;
 }
 
 interface WeeklyCalendarProps {
@@ -43,6 +46,7 @@ interface WeeklyCalendarProps {
 const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({ events: backendEvents, lookups, onRefresh, loading }) => {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+    const [isExecuting, setIsExecuting] = useState(false);
 
     const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 }); // Monday
     const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
@@ -59,15 +63,38 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({ events: backendEvents, 
             title: procedure ? procedure.name : "Procedure Event",
             subject: subject ? `${subject.lastname}, ${subject.firstname}` : e.subject_id,
             study: study ? (study.name || study.ref_code) : e.study_id,
+            procedure_id: e.procedure_id,
             startTime: new Date(e.start_datetime),
             endTime: e.end_datetime ? new Date(e.end_datetime) : addHours(new Date(e.start_datetime), 1),
-            status: e.status
+            status: e.status,
+            procedure_data: e.procedure_data
         };
     });
 
     const nextWeek = () => setCurrentDate(addWeeks(currentDate, 1));
     const prevWeek = () => setCurrentDate(subWeeks(currentDate, 1));
     const today = () => setCurrentDate(new Date());
+
+    const handleProcedureSubmit = async (data: any) => {
+        if (!selectedEvent) return;
+        try {
+            await eventService.update(selectedEvent.id, {
+                procedure_data: data,
+                status: 'completed'
+            });
+            setIsExecuting(false);
+            setSelectedEvent(null);
+            onRefresh?.();
+        } catch (error) {
+            console.error("Failed to update procedure data:", error);
+            alert("Error saving procedure data");
+        }
+    };
+
+    const getSelectedProcedure = () => {
+        if (!selectedEvent) return null;
+        return lookups.procedures.find(p => p.id === selectedEvent.procedure_id);
+    };
 
     return (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col h-full">
@@ -147,7 +174,10 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({ events: backendEvents, 
                                 return (
                                     <div
                                         key={event.id}
-                                        onClick={() => setSelectedEvent(event)}
+                                        onClick={() => {
+                                            setSelectedEvent(event);
+                                            setIsExecuting(false);
+                                        }}
                                         style={{ top: `${top}px`, height: `${height}px` }}
                                         className={cn(
                                             "absolute left-1 right-1 rounded-lg p-2 shadow-sm border-l-4 cursor-pointer transition-all hover:scale-[1.02] hover:shadow-md z-10 overflow-hidden",
@@ -159,6 +189,11 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({ events: backendEvents, 
                                         <p className="text-[10px] font-bold uppercase truncate">{event.study}</p>
                                         <p className="text-xs font-serif font-bold truncate leading-tight mt-0.5">{event.title}</p>
                                         <p className="text-[10px] truncate opacity-70 mt-1">{event.subject}</p>
+                                        {event.status === 'completed' && (
+                                            <div className="absolute top-1 right-1">
+                                                <CheckCircle className="w-3 h-3 text-hku-green" />
+                                            </div>
+                                        )}
                                     </div>
                                 );
                             })}
@@ -167,50 +202,105 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({ events: backendEvents, 
                 </div>
             </div>
 
-            {/* Event Details Modal */}
+            {/* Event Details / Procedure Execution Modal */}
             {selectedEvent && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
-                        <div className="bg-hku-green p-6 text-white relative">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl overflow-hidden animate-in fade-in zoom-in duration-200 flex flex-col max-h-[90vh]">
+                        <div className="bg-hku-green p-6 text-white relative shrink-0">
                             <button
-                                onClick={() => setSelectedEvent(null)}
+                                onClick={() => {
+                                    setSelectedEvent(null);
+                                    setIsExecuting(false);
+                                }}
                                 className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors"
                             >
                                 <ChevronRight className="w-6 h-6 rotate-90" />
                             </button>
                             <p className="text-xs uppercase tracking-widest font-bold text-white/70">{selectedEvent.study}</p>
-                            <h4 className="text-2xl font-serif font-bold mt-1">{selectedEvent.title}</h4>
+                            <h4 className="text-2xl font-serif font-bold mt-1">
+                                {isExecuting ? `Execute: ${selectedEvent.title}` : selectedEvent.title}
+                            </h4>
                         </div>
-                        <div className="p-8 space-y-6">
-                            <div className="flex items-start gap-4">
-                                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
-                                    <Users className="w-5 h-5 text-hku-green" />
-                                </div>
-                                <div>
-                                    <p className="text-[10px] uppercase font-bold text-gray-400">Subject</p>
-                                    <p className="font-medium text-gray-900">{selectedEvent.subject}</p>
-                                </div>
-                            </div>
-                            <div className="flex items-start gap-4">
-                                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
-                                    <CalendarIcon className="w-5 h-5 text-hku-green" />
-                                </div>
-                                <div>
-                                    <p className="text-[10px] uppercase font-bold text-gray-400">Scheduled Time</p>
-                                    <p className="font-medium text-gray-900">
-                                        {format(selectedEvent.startTime, 'MMM d, yyyy · HH:mm')} - {format(selectedEvent.endTime, 'HH:mm')}
-                                    </p>
-                                </div>
-                            </div>
 
-                            <div className="flex gap-3 pt-4 border-t border-gray-100">
-                                <button className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-hku-green text-white rounded-lg hover:bg-opacity-90 transition-all font-semibold shadow-sm">
-                                    <Edit2 className="w-4 h-4" /> Edit Event
-                                </button>
-                                <button className="inline-flex items-center justify-center p-2.5 border border-gray-200 text-gray-500 rounded-lg hover:bg-gray-50 transition-all">
-                                    <Eye className="w-5 h-5" />
-                                </button>
-                            </div>
+                        <div className="p-8 space-y-6 overflow-y-auto">
+                            {!isExecuting ? (
+                                <>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="flex items-start gap-4">
+                                            <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
+                                                <Users className="w-5 h-5 text-hku-green" />
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] uppercase font-bold text-gray-400">Subject</p>
+                                                <p className="font-medium text-gray-900">{selectedEvent.subject}</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-start gap-4">
+                                            <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
+                                                <CalendarIcon className="w-5 h-5 text-hku-green" />
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] uppercase font-bold text-gray-400">Scheduled Time</p>
+                                                <p className="font-medium text-gray-900">
+                                                    {format(selectedEvent.startTime, 'MMM d, yyyy · HH:mm')}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {selectedEvent.status === 'completed' && selectedEvent.procedure_data && (
+                                        <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                                            <p className="text-[10px] uppercase font-bold text-gray-400 mb-2">Recorded Data</p>
+                                            <dl className="grid grid-cols-2 gap-x-4 gap-y-2">
+                                                {Object.entries(selectedEvent.procedure_data).map(([key, val]) => (
+                                                    <div key={key}>
+                                                        <dt className="text-[10px] text-gray-500 font-medium">{key}</dt>
+                                                        <dd className="text-sm text-gray-900">{String(val)}</dd>
+                                                    </div>
+                                                ))}
+                                            </dl>
+                                        </div>
+                                    )}
+
+                                    <div className="flex gap-3 pt-4 border-t border-gray-100">
+                                        {selectedEvent.status !== 'completed' ? (
+                                            <button
+                                                onClick={() => setIsExecuting(true)}
+                                                className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3 bg-hku-green text-white rounded-xl hover:bg-opacity-90 transition-all font-bold shadow-lg shadow-hku-green/20"
+                                            >
+                                                <Play className="w-5 h-5 fill-current" /> Start Procedure
+                                            </button>
+                                        ) : (
+                                            <button
+                                                onClick={() => setIsExecuting(true)}
+                                                className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3 border-2 border-hku-green text-hku-green rounded-xl hover:bg-hku-green/5 transition-all font-bold"
+                                            >
+                                                <Edit2 className="w-5 h-5" /> Edit Recorded Data
+                                            </button>
+                                        )}
+                                        <button className="inline-flex items-center justify-center px-4 py-3 border border-gray-200 text-gray-500 rounded-xl hover:bg-gray-50 transition-all font-semibold">
+                                            Cancel Event
+                                        </button>
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="animate-in slide-in-from-right duration-300">
+                                    {(() => {
+                                        const proc = getSelectedProcedure();
+                                        if (!proc || !proc.form_data_schema) {
+                                            return <p className="text-sm text-gray-500 italic">No schema defined for this procedure.</p>;
+                                        }
+                                        return (
+                                            <DynamicForm
+                                                schema={proc.form_data_schema}
+                                                initialData={selectedEvent.procedure_data}
+                                                onSubmit={handleProcedureSubmit}
+                                                onCancel={() => setIsExecuting(false)}
+                                            />
+                                        );
+                                    })()}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

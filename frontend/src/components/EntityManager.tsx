@@ -184,6 +184,8 @@ const EntityManager: React.FC<EntityManagerProps> = ({ title, fields, service, o
                                                     )}>
                                                         {item[f.key] ? 'Active' : 'Inactive'}
                                                     </span>
+                                                ) : f.type === 'select' ? (
+                                                    f.options?.find(opt => opt.value === item[f.key])?.label || item[f.key]
                                                 ) : item[f.key]}
                                             </td>
                                         ))}

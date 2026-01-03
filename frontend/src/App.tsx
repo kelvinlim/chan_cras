@@ -90,6 +90,7 @@ function App() {
             service={procedureService}
             fields={[
               { key: 'ref_code', label: 'Ref Code', type: 'text', readOnly: true },
+              { key: 'study_id', label: 'Study', type: 'select', options: lookups.studies.map(s => ({ label: s.title, value: s.id })) },
               { key: 'name', label: 'Procedure Name', type: 'text' },
               { key: 'description', label: 'Description', type: 'text' },
               { key: 'form_data_schema', label: 'Form Schema (JSON)', type: 'json' },
