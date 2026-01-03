@@ -13,6 +13,8 @@ from app.auth import (
     admin_required
 )
 
+from app.routers import studies, subjects, procedures, events
+
 app = FastAPI(
     title="Clinical Research Management System (CRAS)",
     description="FDA Part 11 Compliant Research Management Platform",
@@ -22,21 +24,18 @@ app = FastAPI(
 # CORS configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # In production, restrict this to the frontend URL
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Note: authenticate_user needs to be implemented in auth.py
-# I will implement it now.
-
+# Login endpoint
 @app.post("/auth/login")
 async def login_for_access_token(
     form_data: OAuth2PasswordRequestForm = Depends(),
     session: Session = Depends(get_session)
 ):
-    """Local Admin/User authentication fallback."""
     user = authenticate_user(session, form_data.username, form_data.password)
     if not user:
         raise HTTPException(
@@ -50,21 +49,16 @@ async def login_for_access_token(
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
+# Protected common endpoints
 @app.get("/users/me", response_model=User)
 async def read_users_me(current_user: User = Depends(get_current_user)):
-    """Retrieve the current authenticated user's profile."""
     return current_user
 
-@app.get("/studies", response_model=list[Study])
-async def read_studies(
-    session: Session = Depends(get_session),
-    current_user: User = Depends(get_current_user)
-):
-    """List studies accessible to the current user."""
-    # In a real scenario, this would filter based on StudyUserAccess
-    statement = select(Study)
-    results = session.exec(statement).all()
-    return results
+# Include routers
+app.include_router(studies.router)
+app.include_router(subjects.router)
+app.include_router(procedures.router)
+app.include_router(events.router)
 
 @app.get("/")
 def read_root():

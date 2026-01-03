@@ -29,7 +29,18 @@ interface Event {
     status: 'pending' | 'completed' | 'cancelled';
 }
 
-const WeeklyCalendar: React.FC = () => {
+interface WeeklyCalendarProps {
+    events: any[];
+    lookups: {
+        studies: any[];
+        subjects: any[];
+        procedures: any[];
+    };
+    onRefresh?: () => void;
+    loading?: boolean;
+}
+
+const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({ events: backendEvents, lookups, onRefresh, loading }) => {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 
@@ -37,36 +48,22 @@ const WeeklyCalendar: React.FC = () => {
     const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
     const hours = Array.from({ length: 14 }, (_, i) => i + 8); // 8 AM to 9 PM
 
-    // Mock events
-    const [events] = useState<Event[]>([
-        {
-            id: '1',
-            title: 'MRI Scan',
-            subject: 'Chan Tai Man',
-            study: 'Neuro Study A',
-            startTime: addHours(startOfDay(weekDays[0]), 10),
-            endTime: addHours(startOfDay(weekDays[0]), 11),
-            status: 'completed'
-        },
-        {
-            id: '2',
-            title: 'Blood Test',
-            subject: 'Lee Siu Ming',
-            study: 'Diabetes Phase II',
-            startTime: addHours(startOfDay(weekDays[2]), 14),
-            endTime: addHours(startOfDay(weekDays[2]), 15),
-            status: 'pending'
-        },
-        {
-            id: '3',
-            title: 'Consent Form',
-            subject: 'Wong Ka Yee',
-            study: 'Neuro Study A',
-            startTime: addHours(startOfDay(weekDays[4]), 9),
-            endTime: addHours(startOfDay(weekDays[4]), 10),
-            status: 'pending'
-        }
-    ]);
+    // Map backend events to internal format with lookup for names
+    const events: Event[] = backendEvents.map(e => {
+        const study = lookups.studies.find(s => s.id === e.study_id);
+        const subject = lookups.subjects.find(s => s.id === e.subject_id);
+        const procedure = lookups.procedures.find(p => p.id === e.procedure_id);
+
+        return {
+            id: e.id,
+            title: procedure ? procedure.name : "Procedure Event",
+            subject: subject ? `${subject.lastname}, ${subject.firstname}` : e.subject_id,
+            study: study ? (study.name || study.ref_code) : e.study_id,
+            startTime: new Date(e.start_datetime),
+            endTime: e.end_datetime ? new Date(e.end_datetime) : addHours(new Date(e.start_datetime), 1),
+            status: e.status
+        };
+    });
 
     const nextWeek = () => setCurrentDate(addWeeks(currentDate, 1));
     const prevWeek = () => setCurrentDate(subWeeks(currentDate, 1));

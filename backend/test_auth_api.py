@@ -1,6 +1,6 @@
 import httpx
 
-BASE_URL = "http://127.0.0.1:8888"
+BASE_URL = "http://127.0.0.1:8005"
 
 def test_login():
     print("Testing local admin login...")

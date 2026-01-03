@@ -1,5 +1,5 @@
 import React from 'react';
-import { User as UserIcon, LogOut, ChevronRight, Activity, Users, BookOpen, Calendar as CalendarIcon } from 'lucide-react';
+import { User as UserIcon, LogOut, ChevronRight, Activity, Users, BookOpen, ClipboardList } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -10,16 +10,18 @@ function cn(...inputs: ClassValue[]) {
 interface LayoutProps {
     children: React.ReactNode;
     onNewEvent?: () => void;
+    currentView?: string;
+    onNavigate?: (view: string) => void;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children, onNewEvent }) => {
+const Layout: React.FC<LayoutProps> = ({ children, onNewEvent, currentView = 'Dashboard', onNavigate }) => {
     const [sidebarOpen, setSidebarOpen] = React.useState(true);
 
     const menuItems = [
-        { name: 'Dashboard', icon: Activity, href: '#' },
-        { name: 'Studies', icon: BookOpen, href: '#' },
-        { name: 'Subjects', icon: Users, href: '#' },
-        { name: 'Calendar', icon: CalendarIcon, href: '#' },
+        { id: 'Dashboard', name: 'Dashboard', icon: Activity, href: '#' },
+        { id: 'Studies', name: 'Studies', icon: BookOpen, href: '#' },
+        { id: 'Subjects', name: 'Subjects', icon: Users, href: '#' },
+        { id: 'Procedures', name: 'Procedures', icon: ClipboardList, href: '#' },
     ];
 
     return (
@@ -49,11 +51,18 @@ const Layout: React.FC<LayoutProps> = ({ children, onNewEvent }) => {
                 <nav className="flex-1 py-6 px-4 space-y-2">
                     {menuItems.map((item) => (
                         <a
-                            key={item.name}
+                            key={item.id}
                             href={item.href}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                onNavigate?.(item.id);
+                            }}
                             className={cn(
-                                "flex items-center gap-4 p-3 rounded-lg hover:bg-white/10 transition-colors group relative",
-                                !sidebarOpen && "justify-center"
+                                "flex items-center gap-4 p-3 rounded-lg transition-colors group relative",
+                                !sidebarOpen && "justify-center",
+                                currentView === item.id
+                                    ? "bg-white/20 text-white font-bold"
+                                    : "text-white/70 hover:bg-white/10 hover:text-white"
                             )}
                         >
                             <item.icon className="w-6 h-6 shrink-0" />
@@ -96,7 +105,7 @@ const Layout: React.FC<LayoutProps> = ({ children, onNewEvent }) => {
                 {/* Header */}
                 <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 shadow-sm relative z-10">
                     <div className="flex items-center gap-4">
-                        <h2 className="text-xl font-serif font-bold text-hku-green">Weekly Overview</h2>
+                        <h2 className="text-xl font-serif font-bold text-hku-green">{currentView}</h2>
                     </div>
                     <div className="flex items-center gap-4">
                         <button

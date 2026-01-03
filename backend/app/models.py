@@ -24,9 +24,9 @@ class BaseModel(SQLModel):
         max_length=12
     )
     created_at: datetime = Field(default_factory=datetime.utcnow)
-    created_by: str  # User ID/Email
+    created_by: Optional[str] = Field(default=None)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_by: str  # User ID/Email
+    updated_by: Optional[str] = Field(default=None)
 
 # --- Join Table for Study/User Access ---
 class StudyUserAccess(SQLModel, table=True):
@@ -88,6 +88,7 @@ class Subject(BaseModel, table=True):
     phone: Optional[str] = None
     ref_code: str = Field(default_factory=generate_subject_code, unique=True, index=True)
     birthdate: datetime
+    gender: Optional[str] = None
     
     # Privacy: Random UUID4 for data sharing (contains no timestamp info)
     unique_uuid: uuid.UUID = Field(default_factory=uuid.uuid4, index=True)

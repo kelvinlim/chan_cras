@@ -54,7 +54,7 @@ python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 alembic upgrade head
-python3 -m uvicorn app.main:app --port 8888 --reload
+python3 -m uvicorn app.main:app --port 8005 --reload
 ```
 
 ### Frontend Setup

@@ -58,6 +58,17 @@ Implementation of SQLModel entities:
 - **Create New Event**: Button to initiate event creation (Study, Subject, Procedure).
     - **Persistent Selections ("Sticky")**: Chosen values for Study, Subject, and Procedure persist across sessions (using local storage or user profile).
 
+#### [NEW] [DynamicForm.tsx](file:///home/kelvin/Projects/chan_cras/frontend/src/components/DynamicForm.tsx)
+- **Schema-Driven UI**: Renders form fields dynamically based on the `JSONB` schema from the `Procedure` model.
+- **Supported Fields**: `text`, `number`, `date`, `select` (dropdown).
+- **Validation**: Ensures required fields are populated before submission.
+- **Integration**: Feeds data into the `Event.procedure_data` field.
+
+#### [NEW] [EntityManagement]
+Dedicated views for Studies, Subjects, and Procedures:
+- **State-based Routing**: Manage active view (`dashboard`, `studies`, `subjects`, `procedures`) in `App.tsx`.
+- **List & Edit Logic**: Implement consistent CRUD interfaces for all core entities using shared components.
+
 ---
 
 ### Security & Compliance
@@ -71,6 +82,7 @@ Implementation of SQLModel entities:
 
 ### Automated Tests
 - `pytest`: Validate model relationships and JSONB indexing.
+- **Dynamic Form Testing**: Vitest tests to ensure `DynamicForm.tsx` correctly renders various schema types and enforces required fields.
 - **Audit Playback Test**: Verify that a table state can be accurately reconstructed from the `AuditLog` for any past datetime.
 
 ### Manual Verification
