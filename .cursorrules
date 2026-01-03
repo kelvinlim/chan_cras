@@ -1,0 +1,121 @@
+# Cursor Rules: Clear, Documented, Well-Tested Code
+
+## Core Principles
+- Write clear, readable, and maintainable code
+- Document all functions, classes, and complex logic
+- Write comprehensive tests for all functionality
+- Commit changes after each complete implementation cycle
+- Maintain detailed logs of all development conversations
+- Always try to understand execute in accordance with the existing structure and context
+
+## Code Quality Standards
+
+### 1. Code Clarity
+- Use descriptive variable and function names
+- Write self-documenting code with clear intent
+- Avoid magic numbers and strings - use named constants
+- Keep functions/methods small and focused (max 20-30 lines)
+- Use meaningful comments for complex business logic
+- Follow consistent naming conventions appropriate to your language
+- Use meaningful identifiers that express intent
+
+### 2. Documentation Requirements
+- Document all public APIs using language-appropriate documentation standards
+- Include parameter types, return types, and examples
+- Document complex algorithms and business logic
+- Maintain up-to-date README files
+- Include inline comments for non-obvious code
+- Document configuration and environment setup
+- Use standard documentation formats for your language (e.g., JSDoc, Sphinx, Godoc, etc.)
+
+### 3. Testing Standards
+- Write unit tests for all functions and methods
+- Achieve minimum 80% code coverage
+- Include integration tests for APIs and services
+- Write end-to-end tests for critical user workflows
+- Test edge cases and error conditions
+- Use descriptive test names that explain the scenario
+- Follow AAA pattern (Arrange, Act, Assert) or equivalent
+- Use appropriate testing frameworks for your language
+
+### 4. Planning and Execution
+- Always create a detailed plan before implementing features
+- Break down complex tasks into smaller, manageable pieces
+- Use TODO comments to track implementation progress
+- Validate requirements before starting implementation
+- Consider edge cases and error handling upfront
+- Review and refactor code before committing
+
+### 5. Git Workflow
+- Commit after each complete feature or bug fix
+- Write clear, descriptive commit messages
+- Use conventional commit format: `type(scope): description`
+- Create feature branches for major changes
+- Squash commits before merging to main
+- Tag releases with semantic versioning
+
+### Before Starting Any Task
+1. Understand the requirements completely
+2. Create a detailed implementation plan
+3. Identify potential challenges and edge cases
+4. Plan the testing strategy
+5. Consider documentation needs
+
+### During Implementation
+1. Write tests first (TDD approach)
+2. Implement the simplest solution that works
+3. Add comprehensive documentation
+4. Ensure code follows style guidelines
+5. Validate with tests and manual testing
+
+### After Implementation
+1. Run all tests to ensure nothing is broken
+2. Update documentation if needed
+3. Commit changes with descriptive message
+4. Update chat log with implementation details
+5. Review code for potential improvements
+
+## Error Handling
+- Always handle errors gracefully
+- Provide meaningful error messages
+- Log errors appropriately
+- Don't swallow exceptions silently
+- Use appropriate error handling patterns for your language
+- Validate input data thoroughly
+- Implement proper error propagation
+
+## Performance Considerations
+- Optimize for readability first, performance second
+- Profile code when performance issues arise
+- Use appropriate data structures
+- Avoid premature optimization
+- Consider caching strategies
+- Monitor memory usage
+
+## Security Best Practices
+- Validate all user inputs
+- Use secure coding practices appropriate to your language
+- Implement proper authentication and authorization
+- Keep dependencies updated
+- Use secure communication protocols in production
+- Never commit secrets or API keys
+- Follow language-specific security guidelines
+
+## Code Review Checklist
+- [ ] Code follows naming conventions
+- [ ] Functions are small and focused
+- [ ] Documentation is complete and accurate
+- [ ] Tests cover all functionality
+- [ ] Error handling is appropriate
+- [ ] Performance considerations are addressed
+- [ ] Security best practices are followed
+- [ ] Code is readable and maintainable
+
+## Communication
+- Always explain your approach before implementing
+- Ask clarifying questions when requirements are unclear
+- Provide regular updates on progress
+- Document decisions and rationale
+- Maintain detailed logs of all conversations
+
+Remember: Quality code is not just about functionality - it's about creating maintainable, understandable, and reliable software that can evolve with changing requirements.
