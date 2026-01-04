@@ -9,11 +9,9 @@ from datetime import datetime, timedelta
 from app.database import get_session
 from app.models import User
 from app.schemas import MFASetupResponse, MFAVerify
-from app.auth import get_current_user, create_access_token, ALGORITHM
+from app.auth import get_current_user, create_access_token, ALGORITHM, SECRET_KEY
 
 router = APIRouter(prefix="/auth/mfa", tags=["MFA"])
-
-SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key")
 
 @router.get("/setup", response_model=MFASetupResponse)
 def setup_mfa(
@@ -90,7 +88,8 @@ def verify_mfa_login(
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid or expired MFA token")
         
-    user = session.query(User).filter(User.email == email).first()
+    from sqlmodel import select
+    user = session.exec(select(User).where(User.email == email)).first()
     if not user or not user.mfa_secret:
         raise HTTPException(status_code=401, detail="User not found or MFA not configured")
         
