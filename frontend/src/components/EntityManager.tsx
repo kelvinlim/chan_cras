@@ -8,6 +8,8 @@ interface Field {
     type: 'text' | 'number' | 'date' | 'select' | 'json' | 'checkbox';
     options?: { label: string; value: string }[];
     readOnly?: boolean;
+    readOnlyOnEdit?: boolean;
+    required?: boolean;
     persistent?: boolean;
 }
 
@@ -262,10 +264,11 @@ const EntityManager: React.FC<EntityManagerProps> = ({ title, fields, service, o
                                                 <select
                                                     value={formData[f.key]}
                                                     onChange={(e) => setFormData({ ...formData, [f.key]: e.target.value })}
-                                                    disabled={f.readOnly && !!editingItem}
+                                                    disabled={(f.readOnly && !!editingItem) || (f.readOnlyOnEdit && !!editingItem)}
+                                                    required={f.required}
                                                     className={cn(
                                                         "w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hku-green outline-none text-sm",
-                                                        f.readOnly && "bg-gray-100 cursor-not-allowed opacity-75"
+                                                        ((f.readOnly && !!editingItem) || (f.readOnlyOnEdit && !!editingItem)) && "bg-gray-100 cursor-not-allowed opacity-75"
                                                     )}
                                                 >
                                                     <option value="">Select Option</option>
@@ -277,7 +280,8 @@ const EntityManager: React.FC<EntityManagerProps> = ({ title, fields, service, o
                                                         type="checkbox"
                                                         checked={!!formData[f.key]}
                                                         onChange={(e) => setFormData({ ...formData, [f.key]: e.target.checked })}
-                                                        disabled={f.readOnly && !!editingItem}
+                                                        disabled={(f.readOnly && !!editingItem) || (f.readOnlyOnEdit && !!editingItem)}
+                                                        required={f.required}
                                                         className="w-5 h-5 accent-hku-green rounded border-gray-300 focus:ring-hku-green"
                                                     />
                                                     <span className="text-sm font-medium text-gray-700">{f.label}</span>
@@ -293,11 +297,12 @@ const EntityManager: React.FC<EntityManagerProps> = ({ title, fields, service, o
                                                             setFormData({ ...formData, [f.key]: e.target.value });
                                                         }
                                                     }}
-                                                    disabled={f.readOnly && !!editingItem}
+                                                    disabled={(f.readOnly && !!editingItem) || (f.readOnlyOnEdit && !!editingItem)}
+                                                    required={f.required}
                                                     rows={5}
                                                     className={cn(
                                                         "w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hku-green outline-none text-sm font-mono",
-                                                        f.readOnly && "bg-gray-100 cursor-not-allowed opacity-75"
+                                                        ((f.readOnly && !!editingItem) || (f.readOnlyOnEdit && !!editingItem)) && "bg-gray-100 cursor-not-allowed opacity-75"
                                                     )}
                                                     placeholder='{ "key": "value" }'
                                                 />
@@ -306,10 +311,11 @@ const EntityManager: React.FC<EntityManagerProps> = ({ title, fields, service, o
                                                     type={f.type}
                                                     value={formData[f.key] || ''}
                                                     onChange={(e) => setFormData({ ...formData, [f.key]: e.target.value })}
-                                                    disabled={f.readOnly && !!editingItem}
+                                                    disabled={(f.readOnly && !!editingItem) || (f.readOnlyOnEdit && !!editingItem)}
+                                                    required={f.required}
                                                     className={cn(
                                                         "w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hku-green outline-none text-sm",
-                                                        f.readOnly && "bg-gray-100 cursor-not-allowed opacity-75"
+                                                        ((f.readOnly && !!editingItem) || (f.readOnlyOnEdit && !!editingItem)) && "bg-gray-100 cursor-not-allowed opacity-75"
                                                     )}
                                                 />
                                             )}

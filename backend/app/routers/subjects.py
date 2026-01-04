@@ -3,7 +3,7 @@ import json
 from sqlmodel import Session, select
 from typing import List
 from app.database import get_session
-from app.models import Subject, User
+from app.models import Subject, User, StudySubjectLink
 from app.schemas import SubjectCreate, SubjectUpdate, SubjectRead
 from app.auth import get_current_user
 from app.audit import log_change
@@ -17,14 +17,20 @@ def create_subject(
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user)
 ):
-    """Adds a new research subject (participant)."""
-    db_subject = Subject.from_orm(subject_in)
+    """Adds a new research subject and links it to a study."""
+    subject_data = subject_in.dict(exclude={"study_id"})
+    db_subject = Subject(**subject_data)
     db_subject.created_by = current_user.email
     db_subject.updated_by = current_user.email
     
     session.add(db_subject)
     session.commit()
     session.refresh(db_subject)
+    
+    # Create the link to the study
+    link = StudySubjectLink(study_id=subject_in.study_id, subject_id=db_subject.id)
+    session.add(link)
+    session.commit()
     
     # Audit Log
     log_change(
@@ -37,16 +43,27 @@ def create_subject(
     )
     session.commit()
     
-    return db_subject
+    # Set study_id for response
+    response_subject = SubjectRead.from_orm(db_subject)
+    response_subject.study_id = subject_in.study_id
+    return response_subject
 
 @router.get("/", response_model=List[SubjectRead])
 def list_subjects(
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user)
 ):
-    """Lists all subjects."""
+    """Lists all subjects with their primary study_id."""
     statement = select(Subject)
-    results = session.exec(statement).all()
+    subjects = session.exec(statement).all()
+    
+    results = []
+    for s in subjects:
+        s_read = SubjectRead.from_orm(s)
+        # Get the first study_id if it exists
+        if s.studies:
+            s_read.study_id = s.studies[0].id
+        results.append(s_read)
     return results
 
 @router.get("/{subject_id}", response_model=SubjectRead)
@@ -55,11 +72,15 @@ def get_subject(
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user)
 ):
-    """Returns details for a specific subject."""
+    """Returns details for a specific subject with its primary study_id."""
     subject = session.get(Subject, subject_id)
     if not subject:
         raise HTTPException(status_code=404, detail="Subject not found")
-    return subject
+    
+    s_read = SubjectRead.from_orm(subject)
+    if subject.studies:
+        s_read.study_id = subject.studies[0].id
+    return s_read
 
 @router.patch("/{subject_id}", response_model=SubjectRead)
 def update_subject(
@@ -98,4 +119,7 @@ def update_subject(
     )
     session.commit()
     
-    return db_subject
+    s_read = SubjectRead.from_orm(db_subject)
+    if db_subject.studies:
+        s_read.study_id = db_subject.studies[0].id
+    return s_read

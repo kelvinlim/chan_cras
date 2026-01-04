@@ -43,7 +43,7 @@ class SubjectBase(BaseModel):
     sex: Optional[str] = None
 
 class SubjectCreate(SubjectBase):
-    pass
+    study_id: uuid.UUID
 
 class SubjectUpdate(BaseModel):
     lastname: Optional[str] = None
@@ -58,6 +58,7 @@ class SubjectRead(SubjectBase):
     id: uuid.UUID
     ref_code: str
     unique_uuid: uuid.UUID
+    study_id: Optional[uuid.UUID] = None # For frontend display, we will populate this with the first study found
     created_at: datetime
     updated_at: datetime
 

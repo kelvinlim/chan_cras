@@ -101,6 +101,12 @@ function App() {
               { key: 'ref_code', label: 'Ref Code', type: 'text', readOnly: true },
               { key: 'firstname', label: 'First Name', type: 'text' },
               { key: 'lastname', label: 'Last Name', type: 'text' },
+              {
+                key: 'study_id', label: 'Assigned Study', type: 'select',
+                options: lookups.studies.map(s => ({ label: `${s.ref_code}: ${s.name}`, value: s.id })),
+                readOnlyOnEdit: true,
+                required: true
+              },
               { key: 'birthdate', label: 'DOB', type: 'date' },
               { key: 'sex', label: 'Sex', type: 'select', options: [{ label: 'Male', value: 'male' }, { label: 'Female', value: 'female' }] },
             ]}
