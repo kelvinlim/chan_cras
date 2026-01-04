@@ -8,7 +8,9 @@ cffi==2.0.0
 click==8.3.1
 cryptography==46.0.3
 ecdsa==0.19.1
+email-validator>=2.0.0
 fastapi==0.128.0
+google-auth==2.45.0
 greenlet==3.3.0
 h11==0.16.0
 httpcore==1.0.9
@@ -24,8 +26,8 @@ psycopg2-binary==2.9.11
 pyasn1==0.6.1
 pycparser==2.23
 pydantic==2.12.5
-pydantic-settings==2.12.0
 pydantic_core==2.41.5
+pydantic-settings==2.12.0
 Pygments==2.19.2
 pytest==9.0.2
 pytest-asyncio==1.3.0
@@ -37,8 +39,7 @@ six==1.17.0
 SQLAlchemy==2.0.45
 sqlmodel==0.0.31
 starlette==0.50.0
-typing-inspection==0.4.2
 typing_extensions==4.15.0
+typing-inspection==0.4.2
 uuid6==2025.0.1
 uvicorn==0.40.0
-email-validator>=2.0.0

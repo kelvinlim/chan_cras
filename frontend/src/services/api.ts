@@ -35,6 +35,13 @@ export const authService = {
         }
         return response.data;
     },
+    loginWithGoogle: async (idToken: string) => {
+        const response = await api.post('/auth/google/login', { token: idToken });
+        if (response.data.access_token) {
+            localStorage.setItem('token', response.data.access_token);
+        }
+        return response.data;
+    },
     getMe: async () => {
         const response = await api.get('/users/me');
         return response.data;

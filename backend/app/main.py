@@ -14,7 +14,7 @@ from app.auth import (
 )
 
 import os
-from app.routers import studies, subjects, procedures, events, settings, users
+from app.routers import studies, subjects, procedures, events, settings, users, auth_google
 
 app = FastAPI(
     title="Clinical Research Management System (CRAS)",
@@ -63,6 +63,7 @@ app.include_router(procedures.router)
 app.include_router(events.router)
 app.include_router(settings.router)
 app.include_router(users.router)
+app.include_router(auth_google.router)
 
 @app.get("/")
 def read_root():

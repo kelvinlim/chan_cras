@@ -26,8 +26,8 @@ def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
 
 def authenticate_user(session: Session, email: str, password: str) -> Optional[User]:
-    """Authenticates a user against the local database."""
-    user = session.exec(select(User).where(User.email == email)).first()
+    """Authenticates a user against the local database (using gmail field)."""
+    user = session.exec(select(User).where(User.gmail == email)).first()
     if not user:
         return None
     # For local admin auth, we assume User table has a hashed_password or similar.

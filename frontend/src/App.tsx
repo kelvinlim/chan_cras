@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import Layout from './components/Layout';
 import WeeklyCalendar from './components/WeeklyCalendar';
 import EventModal from './components/EventModal';
@@ -211,7 +212,11 @@ function App() {
   }
 
   if (!isAuthenticated) {
-    return <LoginPage onLoginSuccess={handleLoginSuccess} />;
+    return (
+      <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+        <LoginPage onLoginSuccess={handleLoginSuccess} />
+      </GoogleOAuthProvider>
+    );
   }
 
   return (
