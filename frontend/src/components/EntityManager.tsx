@@ -247,86 +247,89 @@ const EntityManager: React.FC<EntityManagerProps> = ({ title, fields, service, o
                                 <Plus className="w-5 h-5 rotate-45" />
                             </button>
                         </div>
-                        <form className="p-8 space-y-4" onSubmit={handleSave}>
-                            {fields.map(f => {
-                                // Hide read-only fields during creation
-                                if (!editingItem && f.readOnly) return null;
+                        <form className="flex flex-col max-h-[85vh]" onSubmit={handleSave}>
+                            <div className="p-8 space-y-4 overflow-y-auto flex-1">
+                                {fields.map(f => {
+                                    // Hide read-only fields during creation
+                                    if (!editingItem && f.readOnly) return null;
 
-                                return (
-                                    <div key={f.key} className="space-y-1.5">
-                                        <label className="text-[10px] uppercase font-bold text-gray-500 tracking-wider">
-                                            {f.label}
-                                        </label>
-                                        {f.type === 'select' ? (
-                                            <select
-                                                value={formData[f.key]}
-                                                onChange={(e) => setFormData({ ...formData, [f.key]: e.target.value })}
-                                                disabled={f.readOnly && !!editingItem}
-                                                className={cn(
-                                                    "w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hku-green outline-none text-sm",
-                                                    f.readOnly && "bg-gray-100 cursor-not-allowed opacity-75"
-                                                )}
-                                            >
-                                                <option value="">Select Option</option>
-                                                {f.options?.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
-                                            </select>
-                                        ) : f.type === 'checkbox' ? (
-                                            <div className="flex items-center gap-2 pt-1">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={!!formData[f.key]}
-                                                    onChange={(e) => setFormData({ ...formData, [f.key]: e.target.checked })}
+                                    return (
+                                        <div key={f.key} className="space-y-1.5">
+                                            <label className="text-[10px] uppercase font-bold text-gray-500 tracking-wider">
+                                                {f.label}
+                                            </label>
+                                            {f.type === 'select' ? (
+                                                <select
+                                                    value={formData[f.key]}
+                                                    onChange={(e) => setFormData({ ...formData, [f.key]: e.target.value })}
                                                     disabled={f.readOnly && !!editingItem}
-                                                    className="w-5 h-5 accent-hku-green rounded border-gray-300 focus:ring-hku-green"
+                                                    className={cn(
+                                                        "w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hku-green outline-none text-sm",
+                                                        f.readOnly && "bg-gray-100 cursor-not-allowed opacity-75"
+                                                    )}
+                                                >
+                                                    <option value="">Select Option</option>
+                                                    {f.options?.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                                                </select>
+                                            ) : f.type === 'checkbox' ? (
+                                                <div className="flex items-center gap-2 pt-1 border border-gray-100/50 p-3 rounded-lg bg-gray-50/30">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={!!formData[f.key]}
+                                                        onChange={(e) => setFormData({ ...formData, [f.key]: e.target.checked })}
+                                                        disabled={f.readOnly && !!editingItem}
+                                                        className="w-5 h-5 accent-hku-green rounded border-gray-300 focus:ring-hku-green"
+                                                    />
+                                                    <span className="text-sm font-medium text-gray-700">{f.label}</span>
+                                                </div>
+                                            ) : f.type === 'json' ? (
+                                                <textarea
+                                                    value={typeof formData[f.key] === 'object' ? JSON.stringify(formData[f.key], null, 2) : formData[f.key]}
+                                                    onChange={(e) => {
+                                                        try {
+                                                            const json = JSON.parse(e.target.value);
+                                                            setFormData({ ...formData, [f.key]: json });
+                                                        } catch {
+                                                            setFormData({ ...formData, [f.key]: e.target.value });
+                                                        }
+                                                    }}
+                                                    disabled={f.readOnly && !!editingItem}
+                                                    rows={5}
+                                                    className={cn(
+                                                        "w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hku-green outline-none text-sm font-mono",
+                                                        f.readOnly && "bg-gray-100 cursor-not-allowed opacity-75"
+                                                    )}
+                                                    placeholder='{ "key": "value" }'
                                                 />
-                                                <span className="text-sm text-gray-600">{f.label}</span>
-                                            </div>
-                                        ) : f.type === 'json' ? (
-                                            <textarea
-                                                value={typeof formData[f.key] === 'object' ? JSON.stringify(formData[f.key], null, 2) : formData[f.key]}
-                                                onChange={(e) => {
-                                                    try {
-                                                        const json = JSON.parse(e.target.value);
-                                                        setFormData({ ...formData, [f.key]: json });
-                                                    } catch {
-                                                        setFormData({ ...formData, [f.key]: e.target.value });
-                                                    }
-                                                }}
-                                                disabled={f.readOnly && !!editingItem}
-                                                rows={5}
-                                                className={cn(
-                                                    "w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hku-green outline-none text-sm font-mono",
-                                                    f.readOnly && "bg-gray-100 cursor-not-allowed opacity-75"
-                                                )}
-                                                placeholder='{ "key": "value" }'
-                                            />
-                                        ) : (
-                                            <input
-                                                type={f.type}
-                                                value={formData[f.key] || ''}
-                                                onChange={(e) => setFormData({ ...formData, [f.key]: e.target.value })}
-                                                disabled={f.readOnly && !!editingItem}
-                                                className={cn(
-                                                    "w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hku-green outline-none text-sm",
-                                                    f.readOnly && "bg-gray-100 cursor-not-allowed opacity-75"
-                                                )}
-                                            />
-                                        )}
-                                    </div>
-                                );
-                            })}
-                            <div className="pt-6 flex gap-3">
+                                            ) : (
+                                                <input
+                                                    type={f.type}
+                                                    value={formData[f.key] || ''}
+                                                    onChange={(e) => setFormData({ ...formData, [f.key]: e.target.value })}
+                                                    disabled={f.readOnly && !!editingItem}
+                                                    className={cn(
+                                                        "w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hku-green outline-none text-sm",
+                                                        f.readOnly && "bg-gray-100 cursor-not-allowed opacity-75"
+                                                    )}
+                                                />
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            <div className="p-6 border-t border-gray-100 bg-gray-50 flex gap-3">
                                 <button
                                     type="button"
                                     onClick={() => setIsModalOpen(false)}
-                                    className="flex-1 px-4 py-2 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-all font-semibold"
+                                    className="flex-1 px-4 py-2 bg-white border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-100 transition-all font-semibold"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="flex-1 px-4 py-2 bg-hku-green text-white rounded-lg hover:bg-opacity-90 transition-all font-semibold shadow-sm flex items-center justify-center gap-2"
+                                    className="flex-1 px-4 py-2 bg-hku-green text-white rounded-lg hover:bg-opacity-90 transition-all font-semibold shadow-md flex items-center justify-center gap-2"
                                 >
                                     {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
                                     Save {title.slice(0, -1)}
