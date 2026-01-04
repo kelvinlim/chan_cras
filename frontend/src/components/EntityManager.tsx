@@ -260,16 +260,20 @@ const EntityManager: React.FC<EntityManagerProps> = ({ title, fields, service, o
                                             <label className="text-[10px] uppercase font-bold text-gray-500 tracking-wider">
                                                 {f.label}
                                             </label>
-                                            {f.type === 'select' ? (
+                                            {((f.readOnly && !!editingItem) || (f.readOnlyOnEdit && !!editingItem)) ? (
+                                                <div className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-400 font-medium cursor-not-allowed flex items-center min-h-[42px]">
+                                                    {f.type === 'select' ?
+                                                        f.options?.find(opt => opt.value === formData[f.key])?.label || formData[f.key] :
+                                                        f.type === 'checkbox' ? (formData[f.key] ? 'Enabled' : 'Disabled') :
+                                                            formData[f.key]
+                                                    }
+                                                </div>
+                                            ) : f.type === 'select' ? (
                                                 <select
                                                     value={formData[f.key]}
                                                     onChange={(e) => setFormData({ ...formData, [f.key]: e.target.value })}
-                                                    disabled={(f.readOnly && !!editingItem) || (f.readOnlyOnEdit && !!editingItem)}
                                                     required={f.required}
-                                                    className={cn(
-                                                        "w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hku-green outline-none text-sm",
-                                                        ((f.readOnly && !!editingItem) || (f.readOnlyOnEdit && !!editingItem)) && "bg-gray-100 cursor-not-allowed opacity-75"
-                                                    )}
+                                                    className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hku-green outline-none text-sm"
                                                 >
                                                     <option value="">Select Option</option>
                                                     {f.options?.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
@@ -280,7 +284,6 @@ const EntityManager: React.FC<EntityManagerProps> = ({ title, fields, service, o
                                                         type="checkbox"
                                                         checked={!!formData[f.key]}
                                                         onChange={(e) => setFormData({ ...formData, [f.key]: e.target.checked })}
-                                                        disabled={(f.readOnly && !!editingItem) || (f.readOnlyOnEdit && !!editingItem)}
                                                         required={f.required}
                                                         className="w-5 h-5 accent-hku-green rounded border-gray-300 focus:ring-hku-green"
                                                     />
@@ -297,13 +300,9 @@ const EntityManager: React.FC<EntityManagerProps> = ({ title, fields, service, o
                                                             setFormData({ ...formData, [f.key]: e.target.value });
                                                         }
                                                     }}
-                                                    disabled={(f.readOnly && !!editingItem) || (f.readOnlyOnEdit && !!editingItem)}
                                                     required={f.required}
                                                     rows={5}
-                                                    className={cn(
-                                                        "w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hku-green outline-none text-sm font-mono",
-                                                        ((f.readOnly && !!editingItem) || (f.readOnlyOnEdit && !!editingItem)) && "bg-gray-100 cursor-not-allowed opacity-75"
-                                                    )}
+                                                    className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hku-green outline-none text-sm font-mono"
                                                     placeholder='{ "key": "value" }'
                                                 />
                                             ) : (
@@ -311,12 +310,8 @@ const EntityManager: React.FC<EntityManagerProps> = ({ title, fields, service, o
                                                     type={f.type}
                                                     value={formData[f.key] || ''}
                                                     onChange={(e) => setFormData({ ...formData, [f.key]: e.target.value })}
-                                                    disabled={(f.readOnly && !!editingItem) || (f.readOnlyOnEdit && !!editingItem)}
                                                     required={f.required}
-                                                    className={cn(
-                                                        "w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hku-green outline-none text-sm",
-                                                        ((f.readOnly && !!editingItem) || (f.readOnlyOnEdit && !!editingItem)) && "bg-gray-100 cursor-not-allowed opacity-75"
-                                                    )}
+                                                    className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hku-green outline-none text-sm"
                                                 />
                                             )}
                                         </div>
