@@ -1,6 +1,9 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://127.0.0.1:8005';
+// Use relative path for production/Nginx proxying
+const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://127.0.0.1:8005'
+    : '/cras-api';
 
 const api = axios.create({
     baseURL: API_BASE_URL,
@@ -119,6 +122,13 @@ export const settingsService = {
     list: async () => (await api.get('/settings/')).data,
     update: async (key: string, value: string) => (await api.patch(`/settings/${key}?value=${encodeURIComponent(value)}`)).data,
     getConfig: async () => (await api.get('/settings/config')).data,
+};
+
+export const userService = {
+    list: async () => (await api.get('/users/')).data,
+    create: async (data: any) => (await api.post('/users/', data)).data,
+    update: async (id: string, data: any) => (await api.patch(`/users/${id}`, data)).data,
+    delete: async (id: string) => (await api.delete(`/users/${id}`)).data,
 };
 
 export default api;

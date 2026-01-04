@@ -29,9 +29,10 @@ interface LayoutProps {
     currentView?: string;
     onNavigate?: (view: string) => void;
     user?: User;
+    onLogout?: () => void;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children, onNewEvent, currentView = 'Dashboard', onNavigate, user }) => {
+const Layout: React.FC<LayoutProps> = ({ children, onNewEvent, currentView = 'Dashboard', onNavigate, user, onLogout }) => {
     const [sidebarOpen, setSidebarOpen] = React.useState(true);
 
     const menuItems = [
@@ -40,7 +41,10 @@ const Layout: React.FC<LayoutProps> = ({ children, onNewEvent, currentView = 'Da
         { id: 'Subjects', name: 'Subjects', icon: Users, href: '#' },
         { id: 'Linkage', name: 'Linkage', icon: Link2, href: '#' },
         { id: 'Procedures', name: 'Procedures', icon: ClipboardList, href: '#' },
-        ...(user?.admin_level === 2 ? [{ id: 'Settings', name: 'Settings', icon: SettingsIcon, href: '#' }] : []),
+        ...(user?.admin_level === 2 ? [
+            { id: 'Users', name: 'Users', icon: Users, href: '#' },
+            { id: 'Settings', name: 'Settings', icon: SettingsIcon, href: '#' }
+        ] : []),
     ];
 
     return (
@@ -113,7 +117,7 @@ const Layout: React.FC<LayoutProps> = ({ children, onNewEvent, currentView = 'Da
                                 <p className="text-[10px] text-white/60 truncate italic">{user?.admin_level === 2 ? 'Administrator' : 'Researcher'}</p>
                             </div>
                         )}
-                        {sidebarOpen && <LogOut className="w-4 h-4 text-white/50 cursor-pointer hover:text-hku-error transition-colors" />}
+                        {sidebarOpen && <LogOut onClick={onLogout} className="w-4 h-4 text-white/50 cursor-pointer hover:text-hku-error transition-colors" />}
                     </div>
                 </div>
 

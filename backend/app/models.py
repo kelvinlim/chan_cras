@@ -9,7 +9,8 @@ from app.utils import (
     generate_study_code, 
     generate_event_code, 
     generate_procedure_code, 
-    generate_subject_code
+    generate_subject_code,
+    generate_user_code
 )
 
 # --- Base Model ---
@@ -63,7 +64,7 @@ class User(BaseModel, table=True):
     status: str = Field(default="active")  # active, inactive
     is_superuser: bool = False
     admin_level: int = Field(default=0)  # 0=none, 1=study limited, 2=study full
-    ref_code: str = Field(default_factory=lambda: generate_short_code(prefix="us-", use_mid_hyphen=False), unique=True, index=True)
+    ref_code: str = Field(default_factory=generate_user_code, unique=True, index=True)
     
     metadata_blob: Dict[str, Any] = Field(default={}, sa_type=JSONB)
     

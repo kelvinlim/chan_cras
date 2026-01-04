@@ -88,3 +88,39 @@ class ProcedureRead(ProcedureBase):
 
     class Config:
         from_attributes = True
+
+# --- User Schemas ---
+class UserBase(BaseModel):
+    lastname: str
+    firstname: str
+    middlename: Optional[str] = None
+    email: EmailStr
+    phone: Optional[str] = None
+    status: str = "active"
+    is_superuser: bool = False
+    admin_level: int = 0
+    metadata_blob: Dict[str, Any] = {}
+
+class UserCreate(UserBase):
+    password: str
+
+class UserUpdate(BaseModel):
+    lastname: Optional[str] = None
+    firstname: Optional[str] = None
+    middlename: Optional[str] = None
+    email: Optional[EmailStr] = None
+    phone: Optional[str] = None
+    status: Optional[str] = None
+    is_superuser: Optional[bool] = None
+    admin_level: Optional[int] = None
+    password: Optional[str] = None
+    metadata_blob: Optional[Dict[str, Any]] = None
+
+class UserRead(UserBase):
+    id: uuid.UUID
+    ref_code: str
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True

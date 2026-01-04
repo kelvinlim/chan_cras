@@ -40,3 +40,6 @@ def generate_procedure_code() -> str:
 
 def generate_subject_code() -> str:
     return generate_short_code(prefix="su-", use_mid_hyphen=False)
+
+def generate_user_code() -> str:
+    return generate_short_code(prefix="us-", use_mid_hyphen=False)

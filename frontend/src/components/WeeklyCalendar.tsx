@@ -33,6 +33,7 @@ interface Event {
     startTime: Date;
     endTime: Date;
     status: string;
+    eventRef: string;
     notes: string;
     procedure_data: any;
 }
@@ -90,6 +91,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
             startTime: fromUTC(e.start_datetime, timezone),
             endTime: e.end_datetime ? fromUTC(e.end_datetime, timezone) : addHours(fromUTC(e.start_datetime, timezone), 1),
             status: e.status,
+            eventRef: e.ref_code || 'No Ref',
             notes: e.notes || '',
             procedure_data: e.procedure_data
         };
@@ -194,7 +196,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
                                             key={event.id}
                                             onClick={() => onEventClick?.(backendEvents.find(be => be.id === event.id))}
                                             style={{ top: `${top}px`, height: `${height}px` }}
-                                            title={`Study: ${event.study}\nSubject: ${event.subjectName} (${event.subjectRef})\nProcedure: ${event.procedureName} (${event.procedureRef})\nTime: ${format(event.startTime, 'HH:mm')} - ${format(event.endTime, 'HH:mm')}${event.notes ? `\n\nNotes:\n${event.notes}` : ''}`}
+                                            title={`Event: ${event.eventRef}\nStudy: ${event.study}\nSubject: ${event.subjectName} (${event.subjectRef})\nProcedure: ${event.procedureName} (${event.procedureRef})\nTime: ${format(event.startTime, 'HH:mm')} - ${format(event.endTime, 'HH:mm')}${event.notes ? `\n\nNotes:\n${event.notes}` : ''}`}
                                             className={cn(
                                                 "absolute left-1 right-1 rounded-lg p-2 shadow-sm border-l-4 cursor-pointer transition-all hover:scale-[1.02] hover:z-30 hover:shadow-xl z-20 overflow-hidden",
                                                 event.status === 'completed' && "bg-hku-green/10 border-hku-green text-hku-green",
@@ -204,8 +206,9 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
                                             )}
                                         >
                                             <p className="text-[8px] font-bold uppercase truncate opacity-70 mb-0.5">{event.study}</p>
-                                            <p className="text-[11px] font-serif font-bold truncate leading-tight mb-1">{event.procedureName}</p>
-                                            <p className="text-[9px] font-medium opacity-80 truncate">{event.subjectRef}</p>
+                                            <p className="text-[9px] font-medium opacity-80 truncate mb-1">{event.subjectRef}</p>
+                                            <p className="text-[11px] font-serif font-bold truncate leading-tight mb-0.5">{event.procedureName}</p>
+                                            <p className="text-[9px] font-medium opacity-60 truncate">{event.eventRef}</p>
                                             {event.status === 'completed' && (
                                                 <div className="absolute top-1 right-1">
                                                     <CheckCircle className="w-3 h-3 text-hku-green" />

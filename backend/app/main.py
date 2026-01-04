@@ -13,12 +13,14 @@ from app.auth import (
     admin_required
 )
 
-from app.routers import studies, subjects, procedures, events, settings
+import os
+from app.routers import studies, subjects, procedures, events, settings, users
 
 app = FastAPI(
     title="Clinical Research Management System (CRAS)",
     description="FDA Part 11 Compliant Research Management Platform",
-    version="0.1.0"
+    version="0.1.0",
+    root_path=os.getenv("CRAS_API_ROOT_PATH", "")
 )
 
 # CORS configuration
@@ -60,6 +62,7 @@ app.include_router(subjects.router)
 app.include_router(procedures.router)
 app.include_router(events.router)
 app.include_router(settings.router)
+app.include_router(users.router)
 
 @app.get("/")
 def read_root():

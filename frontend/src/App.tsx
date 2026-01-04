@@ -2,13 +2,16 @@ import { useState, useEffect, useCallback } from 'react';
 import Layout from './components/Layout';
 import WeeklyCalendar from './components/WeeklyCalendar';
 import EventModal from './components/EventModal';
-import { authService, eventService, studyService, subjectService, procedureService, settingsService } from './services/api';
+import { authService, eventService, studyService, subjectService, procedureService, settingsService, userService } from './services/api';
 
 import EntityManager from './components/EntityManager';
 import StudySubjectLinker from './components/StudySubjectLinker';
 import SettingsManager from './components/SettingsManager';
 
+import LoginPage from './components/LoginPage';
+
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [currentView, setCurrentView] = useState('Dashboard');
   const [isEventModalOpen, setIsEventModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
@@ -39,23 +42,36 @@ function App() {
       });
       setSystemConfig(configData);
       setCurrentUser(userData);
+      setIsAuthenticated(true);
     } catch (error) {
       console.error("Failed to fetch data:", error);
+      setIsAuthenticated(false);
     }
   }, []);
 
   useEffect(() => {
-    // Development Auto-Login
-    const autoLogin = async () => {
-      try {
-        await authService.login('admin@hku.hk', 'hku-admin-2026');
+    const initAuth = async () => {
+      const token = localStorage.getItem('token');
+      if (token) {
         await fetchData();
-      } catch (error) {
-        console.error("Auto-login failed:", error);
+      } else {
+        setIsAuthenticated(false);
       }
     };
-    autoLogin();
+    initAuth();
   }, [fetchData]);
+
+  const handleLoginSuccess = (user: any) => {
+    setCurrentUser(user);
+    setIsAuthenticated(true);
+    fetchData();
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setIsAuthenticated(false);
+    setCurrentUser(null);
+  };
 
   const renderContent = () => {
     switch (currentView) {
@@ -117,6 +133,24 @@ function App() {
             onRefresh={fetchData}
           />
         );
+      case 'Users':
+        return (
+          <EntityManager
+            title="Users"
+            service={userService}
+            fields={[
+              { key: 'ref_code', label: 'Ref Code', type: 'text', readOnly: true },
+              { key: 'firstname', label: 'First Name', type: 'text' },
+              { key: 'lastname', label: 'Last Name', type: 'text' },
+              { key: 'email', label: 'Email', type: 'text' },
+              { key: 'password', label: 'Password', type: 'text' }, // Only used for create/update logic (sending to backend)
+              { key: 'admin_level', label: 'Admin Level', type: 'number' }, // 0, 1, 2
+              { key: 'is_superuser', label: 'Superuser', type: 'checkbox' },
+              { key: 'status', label: 'Status', type: 'select', options: [{ label: 'Active', value: 'active' }, { label: 'Inactive', value: 'inactive' }] },
+            ]}
+            onRefresh={fetchData}
+          />
+        );
       case 'Settings':
         return <SettingsManager />;
       default:
@@ -159,6 +193,27 @@ function App() {
     }
   };
 
+  if (isAuthenticated === null) {
+    return (
+      <div className="h-screen w-full flex items-center justify-center bg-gray-50">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 bg-hku-green rounded-xl flex items-center justify-center shadow-lg animate-bounce">
+            <span className="text-white font-bold italic">HKU</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-hku-green rounded-full animate-bounce [animation-delay:-0.3s]" />
+            <div className="w-2 h-2 bg-hku-green rounded-full animate-bounce [animation-delay:-0.15s]" />
+            <div className="w-2 h-2 bg-hku-green rounded-full animate-bounce" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <LoginPage onLoginSuccess={handleLoginSuccess} />;
+  }
+
   return (
     <Layout
       currentView={currentView}
@@ -168,6 +223,7 @@ function App() {
         setIsEventModalOpen(true);
       }}
       user={currentUser}
+      onLogout={handleLogout}
     >
       <div className="space-y-6 h-full flex flex-col">
         {renderContent()}
