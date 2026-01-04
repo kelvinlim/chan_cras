@@ -103,7 +103,7 @@ function App() {
               { key: 'lastname', label: 'Last Name', type: 'text' },
               {
                 key: 'study_id', label: 'Assigned Study', type: 'select',
-                options: lookups.studies.map(s => ({ label: `${s.ref_code}: ${s.name}`, value: s.id })),
+                options: lookups.studies.map(s => ({ label: `${s.ref_code}: ${s.title}`, value: s.id })),
                 readOnlyOnEdit: true,
                 required: true
               },
