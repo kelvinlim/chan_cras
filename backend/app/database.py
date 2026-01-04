@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     PG_USER: str = "postgres"
     PG_PASSWORD: str = "postgres"
     PG_DB: str = "cras"
+    GOOGLE_CLIENT_ID: str = ""
     
     @property
     def DATABASE_URL(self) -> str:

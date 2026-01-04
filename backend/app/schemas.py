@@ -95,6 +95,7 @@ class UserBase(BaseModel):
     firstname: str
     middlename: Optional[str] = None
     email: EmailStr
+    gmail: Optional[str] = None
     phone: Optional[str] = None
     status: str = "active"
     is_superuser: bool = False
@@ -109,6 +110,7 @@ class UserUpdate(BaseModel):
     firstname: Optional[str] = None
     middlename: Optional[str] = None
     email: Optional[EmailStr] = None
+    gmail: Optional[str] = None
     phone: Optional[str] = None
     status: Optional[str] = None
     is_superuser: Optional[bool] = None

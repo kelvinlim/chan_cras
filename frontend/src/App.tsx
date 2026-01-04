@@ -143,8 +143,9 @@ function App() {
               { key: 'ref_code', label: 'Ref Code', type: 'text', readOnly: true },
               { key: 'firstname', label: 'First Name', type: 'text' },
               { key: 'lastname', label: 'Last Name', type: 'text' },
-              { key: 'email', label: 'Email', type: 'text' },
-              { key: 'password', label: 'Password', type: 'text' }, // Only used for create/update logic (sending to backend)
+              { key: 'email', label: 'Primary Email (Google Auth)', type: 'text' },
+              { key: 'gmail', label: 'Secondary Email (Local Login)', type: 'text' },
+              { key: 'password', label: 'Password', type: 'text' },
               { key: 'admin_level', label: 'Admin Level', type: 'number' }, // 0, 1, 2
               { key: 'is_superuser', label: 'Superuser', type: 'checkbox' },
               { key: 'status', label: 'Status', type: 'select', options: [{ label: 'Active', value: 'active' }, { label: 'Inactive', value: 'inactive' }] },
