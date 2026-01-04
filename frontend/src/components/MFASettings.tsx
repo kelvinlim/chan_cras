@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { authService } from '../services/api';
 import { QRCodeSVG } from 'qrcode.react';
 import { Shield, ShieldCheck, ShieldAlert, Loader2, AlertCircle, Copy, Check } from 'lucide-react';
