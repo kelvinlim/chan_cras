@@ -42,6 +42,25 @@ export const authService = {
         }
         return response.data;
     },
+    setupMFA: async () => {
+        const response = await api.get('/auth/mfa/setup');
+        return response.data;
+    },
+    enableMFA: async (code: string) => {
+        const response = await api.post('/auth/mfa/enable', { code });
+        return response.data;
+    },
+    disableMFA: async () => {
+        const response = await api.post('/auth/mfa/disable');
+        return response.data;
+    },
+    verifyMFA: async (code: string, mfaToken: string) => {
+        const response = await api.post('/auth/mfa/verify', { code, mfa_token: mfaToken });
+        if (response.data.access_token) {
+            localStorage.setItem('token', response.data.access_token);
+        }
+        return response.data;
+    },
     getMe: async () => {
         const response = await api.get('/users/me');
         return response.data;

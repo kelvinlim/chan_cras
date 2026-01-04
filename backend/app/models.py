@@ -60,6 +60,8 @@ class User(BaseModel, table=True):
     email: str = Field(index=True, unique=True)
     phone: Optional[str] = None
     gmail: Optional[str] = None  # For Google Auth mapping
+    mfa_secret: Optional[str] = None # TOTP secret key
+    mfa_enabled: bool = Field(default=False) # Enable/Disable MFA
     
     status: str = Field(default="active")  # active, inactive
     is_superuser: bool = False

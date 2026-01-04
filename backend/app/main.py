@@ -14,7 +14,7 @@ from app.auth import (
 )
 
 import os
-from app.routers import studies, subjects, procedures, events, settings, users, auth_google
+from app.routers import studies, subjects, procedures, events, settings, users, auth_google, auth_mfa
 
 app = FastAPI(
     title="Clinical Research Management System (CRAS)",
@@ -45,6 +45,22 @@ async def login_for_access_token(
             detail="Incorrect email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    
+    # Check if MFA is enabled
+    if user.mfa_enabled:
+        # Issue a temporary token meant ONLY for MFA verification
+        # Shorter expiry (5 mins)
+        mfa_token_expires = timedelta(minutes=5)
+        mfa_token = create_access_token(
+            data={"sub": user.email, "type": "mfa"}, 
+            expires_delta=mfa_token_expires
+        )
+        return {
+            "mfa_required": True,
+            "mfa_token": mfa_token,
+            "user_email": user.email
+        }
+
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": user.email}, expires_delta=access_token_expires
@@ -64,6 +80,7 @@ app.include_router(events.router)
 app.include_router(settings.router)
 app.include_router(users.router)
 app.include_router(auth_google.router)
+app.include_router(auth_mfa.router)
 
 @app.get("/")
 def read_root():

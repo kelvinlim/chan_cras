@@ -100,6 +100,7 @@ class UserBase(BaseModel):
     status: str = "active"
     is_superuser: bool = False
     admin_level: int = 0
+    mfa_enabled: bool = False
     metadata_blob: Dict[str, Any] = {}
 
 class UserCreate(UserBase):
@@ -115,6 +116,7 @@ class UserUpdate(BaseModel):
     status: Optional[str] = None
     is_superuser: Optional[bool] = None
     admin_level: Optional[int] = None
+    mfa_enabled: Optional[bool] = None
     password: Optional[str] = None
     metadata_blob: Optional[Dict[str, Any]] = None
 
@@ -126,3 +128,12 @@ class UserRead(UserBase):
 
     class Config:
         from_attributes = True
+
+# --- MFA Schemas ---
+class MFASetupResponse(BaseModel):
+    secret: str
+    provisioning_uri: str
+
+class MFAVerify(BaseModel):
+    code: str
+    mfa_token: Optional[str] = None # Used for login stage 2

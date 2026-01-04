@@ -8,6 +8,7 @@ import {
     BookOpen,
     ClipboardList,
     Link2,
+    ShieldCheck,
     Settings as SettingsIcon
 } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
@@ -41,6 +42,7 @@ const Layout: React.FC<LayoutProps> = ({ children, onNewEvent, currentView = 'Da
         { id: 'Subjects', name: 'Subjects', icon: Users, href: '#' },
         { id: 'Linkage', name: 'Linkage', icon: Link2, href: '#' },
         { id: 'Procedures', name: 'Procedures', icon: ClipboardList, href: '#' },
+        { id: 'Security', name: 'Security', icon: ShieldCheck, href: '#' },
         ...(user?.admin_level === 2 ? [
             { id: 'Users', name: 'Users', icon: Users, href: '#' },
             { id: 'Settings', name: 'Settings', icon: SettingsIcon, href: '#' }

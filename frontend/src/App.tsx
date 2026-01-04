@@ -8,6 +8,7 @@ import { authService, eventService, studyService, subjectService, procedureServi
 import EntityManager from './components/EntityManager';
 import StudySubjectLinker from './components/StudySubjectLinker';
 import SettingsManager from './components/SettingsManager';
+import MFASettings from './components/MFASettings';
 
 import LoginPage from './components/LoginPage';
 
@@ -150,6 +151,13 @@ function App() {
               { key: 'is_superuser', label: 'Superuser', type: 'checkbox' },
               { key: 'status', label: 'Status', type: 'select', options: [{ label: 'Active', value: 'active' }, { label: 'Inactive', value: 'inactive' }] },
             ]}
+            onRefresh={fetchData}
+          />
+        );
+      case 'Security':
+        return (
+          <MFASettings
+            user={currentUser}
             onRefresh={fetchData}
           />
         );
