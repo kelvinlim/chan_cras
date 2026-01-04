@@ -149,6 +149,7 @@ function App() {
               { key: 'password', label: 'Password', type: 'text' },
               { key: 'admin_level', label: 'Admin Level', type: 'number' }, // 0, 1, 2
               { key: 'is_superuser', label: 'Superuser', type: 'checkbox' },
+              { key: 'mfa_enabled', label: 'MFA Enabled', type: 'checkbox' },
               { key: 'status', label: 'Status', type: 'select', options: [{ label: 'Active', value: 'active' }, { label: 'Inactive', value: 'inactive' }] },
             ]}
             onRefresh={fetchData}
