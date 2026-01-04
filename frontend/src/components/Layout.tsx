@@ -127,7 +127,7 @@ const Layout: React.FC<LayoutProps> = ({ children, onNewEvent, currentView = 'Da
                         "text-[9px] font-mono tracking-tighter transition-all duration-300",
                         sidebarOpen ? "text-white/30" : "text-white/20 text-center"
                     )}>
-                        {sidebarOpen ? 'VERSION 0.1.1' : 'v0.1.1'}
+                        {sidebarOpen ? 'VERSION 0.1.5' : 'v0.1.5'}
                     </p>
                 </div>
             </aside>
